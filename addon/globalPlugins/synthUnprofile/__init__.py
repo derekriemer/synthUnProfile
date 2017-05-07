@@ -7,20 +7,21 @@
 A global plugin to make the synth settings ring intuitive.
 """
 
-import addonHandler
 import config
 import globalVars
 import globalPluginHandler
 import synthDriverHandler
 import synthSettingsRing
 import tones
-#We need to initialize translation and localization support:
-addonHandler.initTranslation()
 
 class SynthSetting(synthSettingsRing.SynthSetting):
 	def _set_value(self,value):
 		setattr(self.synth,self.setting.name,value)
-		config.conf.profiles[0]["speech"][self.synth.name][self.setting.name]=value
+		try:
+			config.conf.profiles[0]["speech"][self.synth.name][self.setting.name]=value
+		except KeyError:
+			#Well, this setting doesn't exist at base level, this profile must be for voice, I.E. reading.
+			super(SynthSetting, self)._set_value(value)
 
 class SynthSettingsRing(synthSettingsRing.SynthSettingsRing):
 	def _get_currentSettingName(self):
@@ -35,8 +36,6 @@ class SynthSettingsRing(synthSettingsRing.SynthSettingsRing):
 
 synthSettingsRing.SynthSetting = SynthSetting
 synthSettingsRing.SynthSettingsRing = SynthSettingsRing
-
-
 
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	def __init__(self):
